@@ -1,17 +1,23 @@
-import random
-import string
-import time
+from selenium.webdriver.support import expected_conditions as EC
+from conftest import BASE_URL
 
 
-def generate_email():
-    prefix = "Vitaly_Shitov_54_"
-    timestamp = str(int(time.time()))[-3:]
-    domain = "ya.ru"
-    return f"{prefix}{timestamp}@{domain}"
+def open_page(driver, path="/"):
+    driver.get(BASE_URL + path)
 
 
-def generate_password(length=10):
-    if length < 6:
-        length = 6
-    chars = string.ascii_letters + string.digits
-    return ''.join(random.choices(chars, k=length))
+def wait_and_click(wait, locator):
+    wait.until(EC.element_to_be_clickable(locator)).click()
+
+
+def wait_and_send_keys(wait, locator, text):
+    wait.until(EC.visibility_of_element_located(locator)).send_keys(text)
+
+
+def login(driver, wait, user):
+    open_page(driver, "/login")
+    from locators import Locators as L
+    wait_and_send_keys(wait, L.LOGIN_EMAIL_INPUT, user["email"])
+    wait_and_send_keys(wait, L.LOGIN_PASSWORD_INPUT, user["password"])
+    wait_and_click(wait, L.LOGIN_SUBMIT)
+    wait.until(EC.visibility_of_element_located(L.ORDER_BUTTON))
